@@ -1,0 +1,10 @@
+{
+  "name": "bdd_and_cleanArchitecture",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.8.6",
+    "typescript": "^5.2.2"
+  }
+}
