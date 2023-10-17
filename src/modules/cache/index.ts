@@ -1,4 +1,4 @@
 export interface CacheStorage {
-    delete: () => void;
+    delete: (key: string) => void;
     // deleteCallCount: number;
 }

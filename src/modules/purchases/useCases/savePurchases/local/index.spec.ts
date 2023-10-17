@@ -9,14 +9,16 @@ class LocalSavePurcheses implements savePurchases {
     }
 
     async save (purchases: PurchaseModel[]) {
-        this.cacheStorage.delete();
+        this.cacheStorage.delete('purchases');
     };
 }
 class CacheStorageMock implements CacheStorage {
     deleteCallCount = 0;
+    key = null;
 
-    delete () {
+    delete (key: string) {
         this.deleteCallCount++;
+        this.key = key;
     };
 }
 
@@ -51,11 +53,11 @@ describe('LocalSavePurchases', () => {
         expect(storage.deleteCallCount).toBe(1);
     });
 
-    test('Should have a deleted count incresed after save purchases', async () => {
+    test("Should delete a specific key ('purchases') in local purchases", async () => {
         const {storage, sut} = makeSut();
         
         await sut.save([]);
 
-        expect(storage.deleteCallCount).toBe(1);
+        expect(storage.key).toBe('purchases');
     }); 
 });
