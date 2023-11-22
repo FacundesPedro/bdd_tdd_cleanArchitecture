@@ -1,20 +1,12 @@
-import { CacheStorage } from "@/modules/cache";
+import { CacheStorage } from "@/db/cache"; 
 import { savePurchases } from "..";
 import { PurchaseModel } from "@/modules/purchases/model";
+import { LocalSavePurcheses } from ".";
 
-class LocalSavePurcheses implements savePurchases {
-    // private cacheStorage: CacheStorage;
-    constructor (private readonly cacheStorage: CacheStorage) {
-        this.cacheStorage = cacheStorage;
-    }
-
-    async save (purchases: PurchaseModel[]) {
-        this.cacheStorage.delete('purchases');
-    };
-}
 class CacheStorageMock implements CacheStorage {
     deleteCallCount = 0;
     key = null;
+    insertCallCount = 0;
 
     delete (key: string) {
         this.deleteCallCount++;
@@ -22,12 +14,12 @@ class CacheStorageMock implements CacheStorage {
     };
 }
 
-interface ISutTest<T,J> {
+interface ISut<T,J> {
     sut: T,
     storage: J,
 }
 
-type LocalSaveSut = ISutTest<LocalSavePurcheses, CacheStorageMock>
+type LocalSaveSut = ISut<LocalSavePurcheses, CacheStorageMock>;
 
 const makeSut = (): LocalSaveSut => {
     const storage = new CacheStorageMock();
@@ -53,11 +45,23 @@ describe('LocalSavePurchases', () => {
         expect(storage.deleteCallCount).toBe(1);
     });
 
-    test("Should delete a specific key ('purchases') in local purchases", async () => {
+    test("Should delete a specific key ('purchases') after save()", async () => {
         const {storage, sut} = makeSut();
         
         await sut.save([]);
 
         expect(storage.key).toBe('purchases');
+        expect(storage.deleteCallCount).toBe(1);
+    }); 
+
+    test("Should not insert new cache in case of delete failure", async () => {
+        const {storage, sut} = makeSut();
+        
+        jest.spyOn(storage, 'delete').mockImplementationOnce(() => { throw new Error() })
+
+        const promise = sut.save([]);
+
+        expect(storage.insertCallCount).toBe(0);
+        expect(promise).rejects.toThrow();
     }); 
 });
