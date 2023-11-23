@@ -1,14 +1,15 @@
 import { CacheStorage } from "@/db/cache"; 
-import { savePurchases } from "..";
+import { SavePurchases } from "..";
 import { PurchaseModel } from "@/modules/purchases/model";
 import { LocalSavePurcheses } from ".";
 
-// mock :O
+// mocks :O
 class CacheStorageMock implements CacheStorage {
     deleteCallCount = 0;
     deleteKey = null;
     insertKey = null;
     insertCallCount = 0;
+    insertValue = null;
 
     delete (key: string) {
         this.deleteCallCount++;
@@ -17,7 +18,12 @@ class CacheStorageMock implements CacheStorage {
     insert (key, data: any) {
         this.insertCallCount++;
         this.insertKey = key;
+        this.insertValue = data;
     };
+
+    throwDeleteError (): void {
+        jest.spyOn(CacheStorageMock.prototype, 'delete').mockImplementationOnce(() => {throw new Error()});
+    }
 }
 // move to indepoendent file
 interface ISut<T,J> {
@@ -26,6 +32,15 @@ interface ISut<T,J> {
 }
 
 type LocalSaveSut = ISut<LocalSavePurcheses, CacheStorageMock>;
+
+const mockPurchases = (): SavePurchases.Params => {
+    return [
+        {id: 1, value: 99, created_at: new Date()},
+        {id: 2, value: 20, created_at: new Date()},
+        {id: 3, value: 234, created_at: new Date()},
+        {id: 4, value: 15, created_at: new Date()}
+    ]
+}
 
 const makeSut = (): LocalSaveSut => {
     const storage = new CacheStorageMock();
@@ -63,7 +78,7 @@ describe('LocalSavePurchases', () => {
     test("Should NOT INSERT new cache in case of delete failure", async () => {
         const {storage, sut} = makeSut();
         
-        jest.spyOn(storage, 'delete').mockImplementationOnce(() => { throw new Error() })
+        storage.throwDeleteError();
 
         const promise = sut.save([]);
 
@@ -72,11 +87,13 @@ describe('LocalSavePurchases', () => {
     }); 
     test("Should INSERT new cache in case of delete success", async () => {
         const {storage, sut} = makeSut();
+        const purchases = mockPurchases();
 
-        await sut.save([]);
+        await sut.save( purchases );
 
         expect(storage.insertCallCount).toBe(1);
         expect(storage.deleteCallCount).toBe(1);
         expect(storage.insertKey).toBe('purchases');  
+        expect(storage.insertValue).toBe(purchases);
     }); 
 });

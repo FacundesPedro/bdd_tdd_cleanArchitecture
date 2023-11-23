@@ -1,8 +1,8 @@
 import { PurchaseModel } from "@/modules/purchases/model";
-import { savePurchases } from "..";
+import { SavePurchases } from "..";
 import { CacheStorage } from "@/db/cache";
  
-export class LocalSavePurcheses implements savePurchases {
+export class LocalSavePurcheses implements SavePurchases {
     // private cacheStorage: CacheStorage;
     constructor (private readonly cacheStorage: CacheStorage) {
         this.cacheStorage = cacheStorage;
