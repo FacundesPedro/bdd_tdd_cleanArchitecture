@@ -9,6 +9,9 @@ export class LocalSavePurcheses implements savePurchases {
     }
 
     async save (purchases: PurchaseModel[]) {
-        this.cacheStorage.delete('purchases');
+        const key = 'purchases';
+
+        this.cacheStorage.delete(key);
+        this.cacheStorage.insert(key, purchases);
     };
 }
