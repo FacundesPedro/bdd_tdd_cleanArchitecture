@@ -1,5 +1,5 @@
 interface PurchaseModel {
-    id: number;
+    id: string;
     created_at: Date;
     value: number;
 }

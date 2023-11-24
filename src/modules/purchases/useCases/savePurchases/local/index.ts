@@ -15,3 +15,5 @@ export class LocalSavePurcheses implements SavePurchases {
         this.cacheStorage.insert(key, purchases);
     };
 }
+
+export default LocalSavePurcheses;
