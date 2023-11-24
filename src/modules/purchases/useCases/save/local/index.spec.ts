@@ -26,7 +26,7 @@ describe('LocalSavePurchases', () => {
     test('Should not have 0 deletedCalls', () => {
         const { storage, sut } = makeSut();
 
-        expect(storage.deleteCallCount).toBe(0);
+        expect(storage.callList).toEqual([]);
     });
 
     test('Should have a DELETE count incresed after save purchases', async () => {
@@ -61,8 +61,9 @@ describe('LocalSavePurchases', () => {
         expect(storage.insertCallCount).toBe(0);
         expect(promise).rejects.toThrow();
     });
-    test("Should throw error in case of insertion error", async () => {
+    test("Should INSERT new cache in case of delete sucess", async () => {
         const { storage, sut } = makeSut();
+
         const purchases = mockPurchases();
 
         await sut.save(purchases);
@@ -71,5 +72,16 @@ describe('LocalSavePurchases', () => {
         expect(storage.deleteCallCount).toBe(1);
         expect(storage.insertKey).toBe('purchases');
         expect(storage.insertValue).toBe(purchases);
+    });
+    test("Should throw error in case of insert failure", async () => {
+        const { storage, sut } = makeSut();
+
+        storage.throwInsertError();
+        const purchases = mockPurchases();
+
+        const promise = sut.save(purchases);
+
+        expect(promise).rejects.toThrow();
+        expect(storage.callList).toEqual([{name: "delete"}, {name: "insert"}])
     });
 });
