@@ -2,33 +2,9 @@ import { CacheStorage } from "@/db/cache";
 import { SavePurchases } from "..";
 import { PurchaseModel } from "@/modules/purchases/model";
 import { LocalSavePurcheses } from ".";
-import { mockPurchases } from "@/db/test/purchases";
+import { mockPurchases } from "@/db/test/Purchases";
+import { CacheStorageMock } from "@/db/test/Cache";
 
-// mocks :O
-class CacheStorageMock implements CacheStorage {
-    deleteCallCount = 0;
-    deleteKey = null;
-    insertKey = null;
-    insertCallCount = 0;
-    insertValue = null;
-
-    delete(key: string) {
-        this.deleteCallCount++;
-        this.deleteKey = key;
-    };
-    insert(key, data: any) {
-        this.insertCallCount++;
-        this.insertKey = key;
-        this.insertValue = data;
-    };
-
-    throwDeleteError(): void {
-        jest.spyOn(CacheStorageMock.prototype, 'delete').mockImplementationOnce(() => { throw new Error() });
-    }
-    throwInsertError(): void {
-        jest.spyOn(CacheStorageMock.prototype, 'insert').mockImplementationOnce(() => { throw new Error() });
-    }
-}
 // move to independent file
 interface ISut<T, J> {
     sut: T,
@@ -56,7 +32,9 @@ describe('LocalSavePurchases', () => {
     test('Should have a DELETE count incresed after save purchases', async () => {
         const { storage, sut } = makeSut();
 
-        await sut.save([]);
+        const purchases = mockPurchases();
+
+        await sut.save(purchases);
 
         expect(storage.deleteCallCount).toBe(1);
     });
@@ -64,7 +42,9 @@ describe('LocalSavePurchases', () => {
     test("Should DELETE a specific key ('purchases') after save()", async () => {
         const { storage, sut } = makeSut();
 
-        await sut.save([]);
+        const purchases = mockPurchases();
+
+        await sut.save(purchases);
 
         expect(storage.deleteKey).toBe('purchases');
         expect(storage.deleteCallCount).toBe(1);
@@ -74,8 +54,9 @@ describe('LocalSavePurchases', () => {
         const { storage, sut } = makeSut();
 
         storage.throwDeleteError();
+        const purchases = mockPurchases();
 
-        const promise = sut.save([]);
+        const promise = sut.save(purchases);
 
         expect(storage.insertCallCount).toBe(0);
         expect(promise).rejects.toThrow();

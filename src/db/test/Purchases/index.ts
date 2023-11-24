@@ -1,4 +1,4 @@
-import { SavePurchases } from "@/modules/purchases/useCases/savePurchases"
+import { SavePurchases } from "@/modules/purchases/useCases/save"
 import { randomUUID } from "crypto"
 
 export const mockPurchases = (): SavePurchases.Params => {
