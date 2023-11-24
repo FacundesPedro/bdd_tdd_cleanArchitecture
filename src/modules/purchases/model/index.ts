@@ -1,6 +1,6 @@
 interface PurchaseModel {
     id: string;
-    created_at: Date;
+    // created_at: Date;
     value: number;
 }
 

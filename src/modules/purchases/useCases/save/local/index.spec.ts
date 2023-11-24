@@ -13,12 +13,12 @@ interface ISut<T, J> {
 
 type LocalSaveSut = ISut<LocalSavePurcheses, CacheStorageMock>;
 
-const makeSut = (): LocalSaveSut => {
+const makeSut = (when = new Date()): LocalSaveSut => {
     const storage = new CacheStorageMock();
 
     return {
         storage,
-        sut: new LocalSavePurcheses(storage)
+        sut: new LocalSavePurcheses(storage, when),
     }
 }
 
@@ -53,7 +53,7 @@ describe('LocalSavePurchases', () => {
     test("Should NOT INSERT new cache in case of delete failure", async () => {
         const { storage, sut } = makeSut();
 
-        storage.throwDeleteError();
+        storage.mockDeleteError();
         const purchases = mockPurchases();
 
         const promise = sut.save(purchases);
@@ -62,7 +62,8 @@ describe('LocalSavePurchases', () => {
         expect(promise).rejects.toThrow();
     });
     test("Should INSERT new cache in case of delete sucess", async () => {
-        const { storage, sut } = makeSut();
+        const when = new Date();
+        const { storage, sut } = makeSut(when);
 
         const purchases = mockPurchases();
 
@@ -71,12 +72,13 @@ describe('LocalSavePurchases', () => {
         expect(storage.insertCallCount).toBe(1);
         expect(storage.deleteCallCount).toBe(1);
         expect(storage.insertKey).toBe('purchases');
-        expect(storage.insertValue).toBe(purchases);
+        expect(storage.insertValue).toEqual({data: purchases, when});
     });
     test("Should throw error in case of insert failure", async () => {
-        const { storage, sut } = makeSut();
+        const when = new Date();
+        const { storage, sut } = makeSut(when);
 
-        storage.throwInsertError();
+        storage.mockInsertError();
         const purchases = mockPurchases();
 
         const promise = sut.save(purchases);

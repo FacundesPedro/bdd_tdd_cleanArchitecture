@@ -20,11 +20,17 @@ export class CacheStorageMock implements CacheStorage {
         this.insertValue = data;
     };
 
-    throwDeleteError(): void {
-        jest.spyOn(CacheStorageMock.prototype, 'delete').mockImplementationOnce(() => { throw new Error() });
+    mockDeleteError(): void {
+        jest.spyOn(CacheStorageMock.prototype, 'delete').mockImplementationOnce(() => { 
+            this.callList.push({name: 'delete'});
+            throw new Error() 
+        });
     }
-    throwInsertError(): void {
-        jest.spyOn(CacheStorageMock.prototype, 'insert').mockImplementationOnce(() => { throw new Error() });
+    mockInsertError(): void {
+        jest.spyOn(CacheStorageMock.prototype, 'insert').mockImplementationOnce(() => { 
+            this.callList.push({name: 'insert'});
+            throw new Error() 
+        });
     }
 }
 
